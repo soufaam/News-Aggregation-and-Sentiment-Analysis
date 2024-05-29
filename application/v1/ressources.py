@@ -5,4 +5,4 @@ from application.v1.endpoints import NewsScore
 from application.v1.endpoints import TopNewsScore
 
 api.add_resource(NewsScore, '/news')
-api.add_resource(NewsScore, '/topnews')
+api.add_resource(TopNewsScore, '/topnews')
