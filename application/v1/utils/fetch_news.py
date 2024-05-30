@@ -50,14 +50,15 @@ def on_demand_fetch_top_headlines(**kwargs):
     load_dotenv()
     try:
         api = NewsApiClient(api_key=os.getenv('NEWS_API_KEY1'))
-        on_demand_top_head = api.get_top_headlines(q=q, language=language, country=country,
-                          sources=sources, page_size=page_size,
-                          category=category)
+        on_demand_top_head = api.get_top_headlines(
+            q=q, language=language,
+            country=country,
+            sources=sources, page_size=page_size,
+            category=category)
     except ValueError:
         return []
     articles = on_demand_top_head.get('articles')
     return articles
-
 
 
 def on_demand_fetch_every_news(**kwargs):
@@ -80,7 +81,8 @@ def on_demand_fetch_every_news(**kwargs):
                                             page_size=page_size,
                                             domains=domains,
                                             sort_by=sort_by,
-                                            category=category,to=to_param,
+                                            category=category,
+                                            to=to_param,
                                             from_param=from_param)
     articles = on_demand_top_head.get('articles')
     return articles

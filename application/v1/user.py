@@ -21,10 +21,13 @@ class UserRegister(Resource):
                 print(user)
                 return {"error": 'Already exist'}, 400
             elif password:
-                hashed_password = bcrypt.generate_password_hash(password=password)
-                mongo.db.users.insert_one({'username': username, 'password': hashed_password})
+                hashed_password = \
+                    bcrypt.generate_password_hash(password=password)
+                mongo.db.users.insert_one(
+                    {'username': username, 'password': hashed_password})
                 access_token = create_access_token(identity=username)
-                return {"message": 'Register Success', "access_token":  access_token}, 200
+                return {"message": 'Register Success',
+                        "access_token": access_token}, 200
             else:
                 return {"error": "Missing password"}, 400
         else:
@@ -36,7 +39,7 @@ class UserLogin(Resource):
         """GET request handling"""
         data = request.get_json()
         if data:
-            username = data.get('username') 
+            username = data.get('username')
             password = data.get('password')
             if username:
                 result_db = mongo.db.users.find_one({"username": username})
@@ -44,12 +47,15 @@ class UserLogin(Resource):
                     pw_hash = result_db.get('password')
                     username = result_db.get('username')
                     if bcrypt.check_password_hash(pw_hash, password):
-                        access_token = create_access_token(identity=result_db.get('username'))
-                        return {"message": 'Login Success', "access_token" : access_token}, 200
+                        access_token = create_access_token(
+                            identity=result_db.get('username'))
+                        return {
+                            "message": 'Login Success',
+                            "access_token": access_token}, 200
                     else:
-                        return {"message":'Login Failed'}, 401
+                        return {"message": 'Login Failed'}, 401
                 else:
-                    return {"message":'Login Failed'}, 401
+                    return {"message": 'Login Failed'}, 401
             else:
                 return {"error": 'Missing username'}, 400
         return {"error": 'Missing username'}, 400

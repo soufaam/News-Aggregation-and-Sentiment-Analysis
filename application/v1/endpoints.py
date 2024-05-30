@@ -45,6 +45,6 @@ class TopNewsScore(Resource):
         data = request.get_json()
         articles = on_demand_fetch_top_headlines(**data)
         if articles == []:
-            return jsonify(error = 'newsApi error: Invalid  parameter'), 401
+            return {"error": 'newsApi error: Invalid  parameter'}, 401
         articles = fetch_and_analyse(articles=articles)
         return json.loads(json_util.dumps(articles))
