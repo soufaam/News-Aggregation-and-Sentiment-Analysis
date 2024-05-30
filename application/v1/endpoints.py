@@ -5,8 +5,10 @@ from flask import jsonify
 from pprint import pprint
 from bson import json_util
 from flask import json, request
-from application.v1.utils.fetch_news import on_demand_fetch_top_headlines
+from application.v1.utils.fetch_news import (on_demand_fetch_top_headlines,
+                                             on_demand_fetch_every_news)
 from application.v1.utils.fetch_and_process import fetch_and_analyse
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 class NewsScore(Resource):
@@ -14,6 +16,7 @@ class NewsScore(Resource):
     Args:
         Resource (_type_): _description_
     """
+    @jwt_required()
     def get(self):
         """get request handling"""
         articles = mongo.db.articles.find()
@@ -21,27 +24,29 @@ class NewsScore(Resource):
         pprint(articles_list)
         return json.loads(json_util.dumps(articles_list))
 
+    @jwt_required()
     def post(self):
         """Post request handling """
         data = request.get_json()
-        language = data.get('language')
-        sources = data.get('sources')
-        q = data.get('q')
-        pageSize = data.get('pageSize')
-        from_date = data.get('from')
-        to_date = data.get('to')
-        sortBy = data.get('sortBy')
+        articles = on_demand_fetch_every_news(**data)
+        if articles == []:
+            return {"error": 'newsApi error: Invalid  parameter'}, 401
+        articles = fetch_and_analyse(articles=articles)
+        return json.loads(json_util.dumps(articles))
 
 
 class TopNewsScore(Resource):
     """
     TopHeadline class
     """
+    @jwt_required()
     def get(self):
         """get request handling"""
 
+    @jwt_required()
     def post(self):
         """Post request handling"""
+        current_user = get_jwt_identity()
         data = request.get_json()
         articles = on_demand_fetch_top_headlines(**data)
         if articles == []:

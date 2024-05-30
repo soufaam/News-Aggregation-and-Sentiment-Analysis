@@ -2,9 +2,12 @@
 """user class"""
 from flask_restful import Resource
 from flask import request
-from application.v1 import bcrypt, mongo
+from application.v1 import bcrypt, mongo, jwt
 from flask import jsonify
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import (create_access_token,
+                                get_jwt_identity, jwt_required, get_jwt)
+from datetime import timedelta
+import redis
 
 
 class UserRegister(Resource):
@@ -59,3 +62,31 @@ class UserLogin(Resource):
             else:
                 return {"error": 'Missing username'}, 400
         return {"error": 'Missing username'}, 400
+
+
+jwt_redis_block_list = redis.StrictRedis(
+    host="localhost",
+    port=6379, db=0,
+    decode_responses=True
+)
+
+
+@jwt.token_in_blocklist_loader
+def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
+    jti = jwt_payload["jti"]
+    token_in_redis = jwt_redis_block_list.get(jti)
+    return token_in_redis is not None
+
+
+class UserLogout(Resource):
+    """User Logout
+    Args:
+        Resource (_type_): _description_
+    """
+    @jwt_required()
+    def delete(self):
+        """User logout """
+        ACCESS_EXPIRES = timedelta(hours=1)
+        jti = get_jwt()["jti"]
+        jwt_redis_block_list.set(jti, "", ex=ACCESS_EXPIRES)
+        return jsonify(message="Logout success")
