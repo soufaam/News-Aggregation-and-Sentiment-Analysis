@@ -7,6 +7,7 @@ from flask_pymongo import PyMongo
 from flask_apscheduler import APScheduler
 from dotenv import load_dotenv
 import os
+from flask_bcrypt import Bcrypt
 
 
 load_dotenv()
@@ -16,6 +17,7 @@ app.config['JWT_SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/news_db'
 jwt = JWTManager(app)
 mongo = PyMongo(app)
+bcrypt = Bcrypt(app)
 scheduler = APScheduler()
 scheduler.api_enabled = True
 scheduler.init_app(app=app)

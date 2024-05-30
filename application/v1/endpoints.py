@@ -21,7 +21,7 @@ class NewsScore(Resource):
         pprint(articles_list)
         return json.loads(json_util.dumps(articles_list))
 
-    def post():
+    def post(self):
         """Post request handling """
         data = request.get_json()
         language = data.get('language')
@@ -37,11 +37,14 @@ class TopNewsScore(Resource):
     """
     TopHeadline class
     """
-    def get():
+    def get(self):
         """get request handling"""
 
-    def post():
+    def post(self):
         """Post request handling"""
         data = request.get_json()
-        articles = on_demand_fetch_top_headlines(data)
-        fetch_and_analyse(articles=articles)
+        articles = on_demand_fetch_top_headlines(**data)
+        if articles == []:
+            return jsonify(error = 'newsApi error: Invalid  parameter'), 401
+        articles = fetch_and_analyse(articles=articles)
+        return json.loads(json_util.dumps(articles))
